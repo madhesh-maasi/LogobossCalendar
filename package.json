@@ -10,6 +10,7 @@
     "serve": "gulp bundle --custom-serve --max_old_space_size=4096 && fast-serve"
   },
   "dependencies": {
+    "@fluentui/react": "^8.106.4",
     "@fullcalendar/core": "^5.10.0",
     "@fullcalendar/daygrid": "^5.10.0",
     "@fullcalendar/interaction": "^5.10.0",
@@ -26,7 +27,8 @@
     "office-ui-fabric-react": "7.174.1",
     "react": "16.13.1",
     "react-dom": "16.13.1",
-    "rrule": "^2.7.1"
+    "rrule": "^2.7.1",
+    "moment": "^2.29.4"
   },
   "devDependencies": {
     "@types/react": "16.9.51",
