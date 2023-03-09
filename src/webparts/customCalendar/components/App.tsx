@@ -14,7 +14,8 @@ const App = (props) => {
   const [events, setEvents] = useState([]);
   const [color, setColor] = useState([]);
   const [selectedKeys, setSelectedKeys] = React.useState([]);
-
+  const [render,setRender] = useState(false);
+  const [eventItem,setEventItem]=useState({})
   const getGroupEvents = async () => {
     // 5f5263bc-2144-4b8b-9eb0-2d225dfc6de1
 
@@ -419,11 +420,13 @@ const App = (props) => {
             data = [...data];
             setEvents(data);
             setMasterEvents(data);
+            setRender(false)
+            setRender(true)
           });
       });
   };
 
-  const onChange = (event, item) => {
+  const handleRenderData = (item) => {
     let _selectedItems = [];
     if (item) {
       _selectedItems = item.selected
@@ -434,13 +437,15 @@ const App = (props) => {
 
     if (_selectedItems.length > 0) {
       let _filteredEvents = masterEvents;
+      let currentDate = moment(new Date()).format("YYYY-MM-DD");
+      currentDate=currentDate+"T00.00.00.000Z";
 
       _filteredEvents = _filteredEvents.filter((event) => {
         return (
           (_selectedItems.some((_b) => _b == "Birthday") &&
-            event.backgroundColor == "green") ||
+            event.backgroundColor == "green" &&  moment(event.start).format() >currentDate ) ||
           (_selectedItems.some((_v) => _v == "Vacation") &&
-            event.backgroundColor == "blue")
+            event.backgroundColor == "blue" && moment(event.start).format() >currentDate)
         );
       });
       console.log(_filteredEvents, "filterdata");
@@ -456,7 +461,7 @@ const App = (props) => {
 
         _todayevents = _todayevents.filter((res) => 
         {
-          console.log(moment(res.start).format("YYYY-MM-DD"))
+         
           return (
            
             moment(res.start).format() >currentDate 
@@ -473,7 +478,12 @@ const App = (props) => {
   useEffect(() => {
     getGroupEvents();
   }, []);
-
+useEffect(()=>{
+  if(render){
+    handleRenderData(eventItem);
+    setRender(false)
+  }
+},[render]);
   return (
     <div style={{ display: "flex", width: "70%", gap: "20px" }}>
       <CalendarView calendarValue={events} />
@@ -487,7 +497,7 @@ const App = (props) => {
         <Dropdown
           placeholder="Select options"
           label="Events"
-          onChange={onChange}
+          onChange={(_,e)=>{setRender(true);setEventItem(e)}}
           selectedKeys={selectedKeys}
           multiSelect
           options={dropdownvalue}
