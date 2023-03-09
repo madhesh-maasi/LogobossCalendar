@@ -1,0 +1,18 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "custom-calendar-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/customCalendar/CustomCalendarWebPart.js",
+          "manifest": "./src/webparts/customCalendar/CustomCalendarWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "CustomCalendarWebPartStrings": "lib/webparts/customCalendar/loc/{locale}.js"
+  }
+}

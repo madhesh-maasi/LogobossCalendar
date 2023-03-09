@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "logoboss-calendar-client-side-solution",
+    "id": "adc3ab5b-24ea-42ad-b27e-be77b53317e9",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.14.0"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "logoboss-calendar description"
+      },
+      "longDescription": {
+        "default": "logoboss-calendar description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "logoboss-calendar Feature",
+        "description": "The feature that activates elements of the logoboss-calendar solution.",
+        "id": "d251fa79-35e4-42e2-839d-d9f6131ca4ca",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/logoboss-calendar.sppkg"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "version": "1.14.0",
+    "libraryName": "logoboss-calendar",
+    "libraryId": "adc3ab5b-24ea-42ad-b27e-be77b53317e9",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionName": "logoboss-calendar",
+    "solutionShortDescription": "logoboss-calendar description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "componentType": "webpart"
+  }
+}
