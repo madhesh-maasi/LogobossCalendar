@@ -6,4 +6,5 @@ export interface ICustomCalendarProps {
   userDisplayName: string;
   graphcontext:any;
   spcontext:any;
+  CalendarID:string;
 }

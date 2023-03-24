@@ -21,6 +21,7 @@ export default class CustomCalendar extends React.Component<
       <App
         spcontext={this.props.spcontext}
         graphcontext={this.props.graphcontext}
+        calID = {this.props.CalendarID}
       />
     );
   }

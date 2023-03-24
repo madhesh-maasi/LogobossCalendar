@@ -1,7 +1,7 @@
 @import '~office-ui-fabric-react/dist/sass/References.scss';
 
 .customCalendar {
-  overflow: hidden;
+  
   padding: 1em;
   color: "[theme:bodyText, default: #323130]";
   color: var(--bodyText);
@@ -32,3 +32,40 @@
     }
   }
 }
+.Rightcontainer{
+  display: flex;
+  //  width: 70%;
+    gap: 20px;
+
+}
+.RightSection{
+  background: #FFFFFF;
+  box-shadow: -2px 0px 6px rgba(0, 0, 0, 0.25);
+  border-radius: 2px;
+  padding:16px;
+  width: 270px;
+  // height: 464px;
+}
+.scrollSection{
+  padding: 3px;
+    height: 345px;
+    overflow: auto;
+}
+.scrollSection::-webkit-scrollbar{
+  width: 10px;
+}
+.scrollSection::-webkit-scrollbar-thumb{
+  border-radius: 10px;
+  background-color: rgb(98, 98, 98);
+}
+.RightDisplaydata{
+  display: flex;
+  align-items: center;
+  background: #FFFFFF;
+  margin: 10px 0px;
+  gap: 10px;
+  box-shadow: -2px 0px 6px rgba(0, 0, 0, 0.25);
+  border-radius:  5px;
+  padding:10px
+}
+

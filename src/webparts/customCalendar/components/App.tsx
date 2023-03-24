@@ -2,30 +2,33 @@ import * as React from "react";
 import { useState, useEffect } from "react";
 import styles from "./CustomCalendar.module.scss";
 import CalendarView from "./CalendarView";
-let timeZone = "India Standard Time"; //for local time zone
+let timeZone = "Pacific Standard Time"; //for local time zone
+// let timeZone = "India Standard Time"; //for local time zone
 import { Dropdown } from "@fluentui/react/lib/Dropdown";
 import * as moment from "moment";
 let headers = { Prefer: 'outlook.timezone="' + timeZone + '"' };
 let data = [];
 let listColor = [];
 let dropdownvalue = [];
+let _arrFilterEvent: any[] = [];
 const App = (props) => {
   const [masterEvents, setMasterEvents] = useState([]);
   const [events, setEvents] = useState([]);
   const [color, setColor] = useState([]);
   const [selectedKeys, setSelectedKeys] = React.useState([]);
-  const [render,setRender] = useState(false);
-  const [eventItem,setEventItem]=useState({})
+  const [render, setRender] = useState(false);
+  const [eventItem, setEventItem] = useState({});
+  const [todayevents, setTodayevents] = useState([]);
   const getGroupEvents = async () => {
     // 5f5263bc-2144-4b8b-9eb0-2d225dfc6de1
 
     await props.spcontext.web.lists
-      .getByTitle("LoggoCalender")
+      .getByTitle("CalendarConfig")
       .items.get()
       .then((res: any) => {
         console.log(res, "res");
         listColor = res;
-        dropdownvalue = [];
+        dropdownvalue = [{ key: "Select All", text: "Select All" }];
         res.forEach((col) => {
           if (col.Title != "Default") {
             dropdownvalue.push({
@@ -34,16 +37,18 @@ const App = (props) => {
             });
           }
 
-          console.log(col.Color);
+          // console.log(col.Color);
         });
 
-        console.log(dropdownvalue);
+        // console.log(dropdownvalue);
         setColor(listColor);
-        console.log("listcolor", listColor);
+        // console.log("listcolor", listColor);
         //////////calenderdata
 
+        // Webpart property pane
         props.graphcontext.groups
-          .getById("5f5263bc-2144-4b8b-9eb0-2d225dfc6de1")
+          // .getById("5f5263bc-2144-4b8b-9eb0-2d225dfc6de1")
+          .getById(props.calID)
           .events.configure({ headers })
           .top(999)()
           .then((result: any) => {
@@ -52,21 +57,32 @@ const App = (props) => {
             let recEndDateTime;
             let recEDate;
             data = result.map((evt) => {
+              // console.log(evt, "evt");
+
               let recED = "";
               let eventColor = "";
               let eventType = "";
-              let eventColorArr = listColor.filter((colLi) => {
-                return evt.subject
-                  .toLowerCase()
-                  .includes(colLi.Title.toLowerCase());
-              });
+              let typeOfEvent = "";
+              let imageUrl = "";
+              let eventColorArr = [];
+
+              if (evt.subject) {
+                eventColorArr = listColor.filter((colLi) => {
+                  return evt.subject
+                    .toLowerCase()
+                    .includes(colLi.Title.toLowerCase());
+                });
+              }
+
               eventColorArr.length > 0
                 ? ((eventColor = eventColorArr[0].Color),
-                  (eventType = "GroupCalendar"))
+                  (eventType = "GroupCalendar"),
+                  (typeOfEvent = eventColorArr[0].Title))
                 : ((eventColor = listColor.filter(
                     (colLi) => colLi.isDefault == true
                   )[0].Color),
-                  (eventType = "GroupCalendar Other"));
+                  (eventType = "GroupCalendar Other"),
+                  (typeOfEvent = "Others"));
 
               let dow = [];
               evt.recurrence &&
@@ -137,6 +153,7 @@ const App = (props) => {
                     borderColor: eventColor,
                     allDay: evt.isAllDay,
                     itemFrom: eventType,
+                    typeOfEvent: typeOfEvent,
                     rrule: {
                       freq: "weekly",
                       interval: evt.recurrence.pattern.interval,
@@ -209,6 +226,7 @@ const App = (props) => {
                     borderColor: eventColor,
                     allDay: evt.isAllDay,
                     itemFrom: eventType,
+                    typeOfEvent: typeOfEvent,
                     rrule: {
                       freq: "daily",
                       interval: evt.recurrence.pattern.interval,
@@ -288,6 +306,7 @@ const App = (props) => {
                     borderColor: eventColor,
                     allDay: evt.isAllDay,
                     itemFrom: eventType,
+                    typeOfEvent: typeOfEvent,
                     rrule: {
                       freq: "monthly",
                       interval: evt.recurrence.pattern.interval,
@@ -347,6 +366,7 @@ const App = (props) => {
                     borderColor: eventColor,
                     allDay: evt.isAllDay,
                     itemFrom: eventType,
+                    typeOfEvent: typeOfEvent,
                     rrule: {
                       freq: "monthly",
                       interval: evt.recurrence.pattern.interval,
@@ -413,6 +433,7 @@ const App = (props) => {
                     borderColor: eventColor,
                     allDay: evt.isAllDay,
                     itemFrom: eventType,
+                    typeOfEvent: typeOfEvent,
                     //  description: evt.bodyPreview,
                   };
             });
@@ -420,8 +441,8 @@ const App = (props) => {
             data = [...data];
             setEvents(data);
             setMasterEvents(data);
-            setRender(false)
-            setRender(true)
+            setRender(false);
+            setRender(true);
           });
       });
   };
@@ -429,107 +450,210 @@ const App = (props) => {
   const handleRenderData = (item) => {
     let _selectedItems = [];
     if (item) {
-      _selectedItems = item.selected
-        ? [...selectedKeys, item.key]
-        : selectedKeys.filter((key) => key !== item.key);
+      if (item.key == "Select All") {
+        if (item.selected) {
+          _selectedItems = dropdownvalue.map((value) => value.key);
+        } else {
+          _selectedItems = [];
+        }
+      } else {
+        _selectedItems = item.selected
+          ? [...selectedKeys, item.key]
+          : selectedKeys.filter(
+              (key) => key !== item.key && key != "Select All"
+            );
+
+        if (
+          _selectedItems.filter((_filter) => _filter != "Select All").length ==
+          dropdownvalue.filter((filter) => filter.key != "Select All").length
+        ) {
+          _selectedItems.unshift("Select All");
+        }
+      }
     }
     setSelectedKeys(_selectedItems);
 
     if (_selectedItems.length > 0) {
       let _filteredEvents = masterEvents;
-      let currentDate = moment(new Date()).format("YYYY-MM-DD");
-      currentDate=currentDate+"T00.00.00.000Z";
+      _arrFilterEvent = [];
+      let currentDate = moment().format("DDMMYYYY");
 
       _filteredEvents = _filteredEvents.filter((event) => {
         return (
-          (_selectedItems.some((_b) => _b == "Birthday") &&
-            event.backgroundColor == "green" &&  moment(event.start).format() >currentDate ) ||
-          (_selectedItems.some((_v) => _v == "Vacation") &&
-            event.backgroundColor == "blue" && moment(event.start).format() >currentDate)
+          _selectedItems.some(
+            (_b) => _b.toLowerCase() == event.typeOfEvent.toLowerCase()
+          ) &&
+          parseInt(moment(event.start).format("DDMMYYYY")) <=
+            parseInt(currentDate) &&
+          parseInt(moment(event.end).format("DDMMYYYY")) >=
+            parseInt(currentDate)
         );
       });
       console.log(_filteredEvents, "filterdata");
+      for (let i = 0; _filteredEvents.length > i; i++) {
+        if (
+          parseInt(moment(_filteredEvents[i].start).format("DDMMYYYY")) ==
+            parseInt(currentDate) &&
+          parseInt(moment(_filteredEvents[i].end).format("DDMMYYYY")) ==
+            parseInt(currentDate)
+        ) {
+          let curStartHour: string = moment(_filteredEvents[i].start)
+            .hours()
+            .toString();
+          let curStartMin: string = moment(_filteredEvents[i].start)
+            .minutes()
+            .toString();
+          let curStartSec: string = moment(_filteredEvents[i].start)
+            .seconds()
+            .toString();
+          let curStartMillSec: string = moment(_filteredEvents[i].start)
+            .milliseconds()
+            .toString();
+          let curStartTime: number = parseInt(
+            curStartHour + curStartMin + curStartSec + curStartMillSec
+          );
+          let curEndHour: string = moment(_filteredEvents[i].end)
+            .hours()
+            .toString();
+          let curEndMin: string = moment(_filteredEvents[i].end)
+            .minutes()
+            .toString();
+          let curEndSec: string = moment(_filteredEvents[i].end)
+            .seconds()
+            .toString();
+          let curEndMillSec: string = moment(_filteredEvents[i].end)
+            .milliseconds()
+            .toString();
+          let curEndTime: number = parseInt(
+            curEndHour + curEndMin + curEndSec + curEndMillSec
+          );
+          let curStartDate: any = moment().format("YYYY-MM-DDT00:00:00.000Z")
+          let curEndDate: any = moment().format("YYYY-MM-DDT23:59:59.000Z")
+          _arrFilterEvent.push({
+            allDay: _filteredEvents[i].allDay,
+            attendees: _filteredEvents[i].attendees,
+            backgroundColor: _filteredEvents[i].backgroundColor,
+            borderColor: _filteredEvents[i].borderColor,
+            description: _filteredEvents[i].description,
+            display: _filteredEvents[i].display,
+            id: _filteredEvents[i].id,
+            itemFrom: _filteredEvents[i].itemFrom,
+            title: _filteredEvents[i].title,
+            typeOfEvent: _filteredEvents[i].typeOfEvent,
+            start:
+              curStartTime == 0
+                ? curStartDate
+                : _filteredEvents[i].start,
+            end:
+              curEndTime == 0
+                ? curEndDate
+                : _filteredEvents[i].end,
+          });
+        } else {
+          let curStartDate: any = moment().format("YYYY-MM-DDT00:00:00.000Z")
+          let curEndDate: any = moment().format("YYYY-MM-DDT23:59:59.000Z")
+          _arrFilterEvent.push({
+            allDay: _filteredEvents[i].allDay,
+            attendees: _filteredEvents[i].attendees,
+            backgroundColor: _filteredEvents[i].backgroundColor,
+            borderColor: _filteredEvents[i].borderColor,
+            description: _filteredEvents[i].description,
+            display: _filteredEvents[i].display,
+            id: _filteredEvents[i].id,
+            itemFrom: _filteredEvents[i].itemFrom,
+            title: _filteredEvents[i].title,
+            typeOfEvent: _filteredEvents[i].typeOfEvent,
+            start: curStartDate,
+            end: curEndDate,
+          });
+        }
+      }
+      debugger;
+      console.log("_arrFilterEvent > ", _arrFilterEvent);
 
-      setEvents(_filteredEvents);
+      setEvents(_arrFilterEvent);
+      // setEvents(_filteredEvents);
     } else {
       if (_selectedItems.length == 0) {
-        let currentDate = moment(new Date()).format("YYYY-MM-DD");
+        let currentDate = moment().format("DDMMYYYY");
         // console.log(currentDate);
-        currentDate=currentDate+"T00.00.00.000Z";
 
         let _todayevents = masterEvents;
 
-        _todayevents = _todayevents.filter((res) => 
-        {
-         
+        _todayevents = _todayevents.filter((res) => {
           return (
-           
-            moment(res.start).format() >currentDate 
-            // moment(res.end).format("DD/MM/YYYY") <= currentDate
+            parseInt(moment(res.start).format("DDMMYYYY")) <=
+              parseInt(currentDate) &&
+            parseInt(moment(res.end).format("DDMMYYYY")) >=
+              parseInt(currentDate)
           );
         });
         console.log(_todayevents, "today events");
 
-        setEvents(_todayevents);
+        setTodayevents(_todayevents);
       }
+      setEvents(masterEvents);
+    }
+  };
+
+  const getImageURLFunction = (typeOfEvent) => {
+    let filteredArr = listColor.filter((item) => item.Title == typeOfEvent);
+    if (filteredArr.length > 0 && filteredArr[0].Icon) {
+      let imgObj = JSON.parse(filteredArr[0].Icon);
+      return imgObj ? imgObj.serverRelativeUrl : "";
+    } else {
+      let defaultFilteredArr = listColor.filter(
+        (item) => item.Title == "Default"
+      );
+
+      return defaultFilteredArr.length > 0
+        ? JSON.parse(defaultFilteredArr[0].Icon).serverRelativeUrl
+        : "";
     }
   };
 
   useEffect(() => {
     getGroupEvents();
   }, []);
-useEffect(()=>{
-  if(render){
-    handleRenderData(eventItem);
-    setRender(false)
-  }
-},[render]);
+  useEffect(() => {
+    if (render) {
+      handleRenderData(eventItem);
+      setRender(false);
+    }
+  }, [render]);
   return (
-    <div style={{ display: "flex", width: "70%", gap: "20px" }}>
+    <div className={styles.Rightcontainer}>
       <CalendarView calendarValue={events} />
-      <div
-        style={{
-          background: " #FFFFFF",
-          boxShadow: "-2px 0px 6px rgba(0, 0, 0, 0.25)",
-          borderRadius: "2px",
-        }}
-      >
+
+      <div className={styles.RightSection}>
         <Dropdown
-          placeholder="Select options"
-          label="Events"
-          onChange={(_,e)=>{setRender(true);setEventItem(e)}}
+          placeholder="Category"
+          label="Highlights of  Today"
+          onChange={(_, e) => {
+            setRender(true);
+            setEventItem(e);
+            console.log(e);
+          }}
           selectedKeys={selectedKeys}
           multiSelect
           options={dropdownvalue}
-          style={{ width: "300px" }}
+          style={{ width: "100%" }}
         />
-        {events.slice(0, 5).map((res) => {
-          return (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                background: "#FFFFFF",
-                margin: "10px 0px",
-                gap: "10px",
-                padding: "10px",
-                boxShadow: "-2px 0px 6px rgba(0, 0, 0, 0.25)",
-                borderRadius: " 5px,",
-              }}
-            >
-              <img
-                src={
-                  res.backgroundColor == "green"
-                    ? "https://cdn-icons-png.flaticon.com/512/4525/4525667.png"
-                    : ""
-                }
-                width={20}
-                height={20}
-              />
-              <p style={{ margin: 0 }}>{res.title}</p>
-            </div>
-          );
-        })}
+
+        <div className={styles.scrollSection}>
+          {(selectedKeys.length == 0 ? todayevents : events).map((res) => {
+            return (
+              <div className={styles.RightDisplaydata}>
+                <img
+                  src={getImageURLFunction(res.typeOfEvent)}
+                  width={20}
+                  height={20}
+                />
+                <p style={{ margin: 0 }}>{res.title}</p>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

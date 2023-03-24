@@ -20,7 +20,8 @@ export interface ICustomCalendarWebPartProps {
   description: string;
   context: string;
   graphcontext:any;
-  spcontext:any
+  spcontext:any;
+  CalendarID:string;
 }
 
 export default class CustomCalendarWebPart extends BaseClientSideWebPart<ICustomCalendarWebPartProps> {
@@ -65,6 +66,7 @@ export default class CustomCalendarWebPart extends BaseClientSideWebPart<ICustom
         userDisplayName: this.context.pageContext.user.displayName,
         graphcontext: graph,
         spcontext: sp,
+        CalendarID:this.properties.CalendarID
       }
     );
 
@@ -115,6 +117,9 @@ export default class CustomCalendarWebPart extends BaseClientSideWebPart<ICustom
               groupFields: [
                 PropertyPaneTextField('description', {
                   label: strings.DescriptionFieldLabel
+                }),
+                PropertyPaneTextField('CalendarID', {
+                  label: "Calendar ID"
                 })
               ]
             }
